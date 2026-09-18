@@ -776,8 +776,10 @@
     }
 
     function renderChart(data) {
+      const myData = data.filter(r => String(r.idGuru || '').trim() === String(currentUser.id || '').trim());
+
       const counts = { tepat: 0, late: 0, izin: 0, alpa: 0, belum: 0 };
-      data.forEach(d => { if (counts[d.kategori] !== undefined) counts[d.kategori]++; });
+      myData.forEach(d => { if (counts[d.kategori] !== undefined) counts[d.kategori]++; });
 
       const ctx = document.getElementById('chartKehadiran').getContext('2d');
       if (chartInstance) chartInstance.destroy();
