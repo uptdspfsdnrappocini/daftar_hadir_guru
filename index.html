@@ -3,10 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Aplikasi Presensi Guru SDN Rappocini</title>
+  <title>Aplikasi Presensi Guru SD Negeri Rappocini</title>
+
+  <!-- PWA: Ikon & Manifest (tampil sebagai logo sekolah saat "Tambahkan ke Layar Utama") -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#0f2a66">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Presensi Rappocini">
 
   <!-- CSS Frameworks & Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: { navy: { 50:"#eef2fa", 100:"#dde5f4", 200:"#bccae8", 500:"#2d4f9e", 600:"#17387f", 700:"#0f2a66", 800:"#0b2050", 900:"#081739" } } } } };
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,12 +29,13 @@
 
   <style>
     body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-    .bg-primary { background: linear-gradient(135deg, #1e40af, #1e3a8a); }
-    .nav-active { color: #2563eb; font-weight: 700; }
+    .bg-primary { background: linear-gradient(135deg, #16397f, #0a1f4f); }
+    .nav-active { color: #0f2a66; font-weight: 700; }
     ::-webkit-scrollbar { height: 6px; width: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     .swal2-input, .swal2-textarea, .swal2-select { font-size: 13px !important; }
-    #matrixPreviewTable td, #matrixPreviewTable th { border: 1px solid #f1f5f9; white-space: nowrap; }
+    #matrixPreviewTable td, #matrixPreviewTable th,
+    #jamKerjaTable td, #jamKerjaTable th { border: 1px solid #f1f5f9; white-space: nowrap; }
   </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 pb-20">
@@ -27,22 +43,20 @@
   <!-- LOGIN MODAL CONTAINER -->
   <div id="loginSection" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
-      <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 text-2xl">
-        <i class="fa-solid fa-school"></i>
-      </div>
-      <h2 class="text-xl font-bold text-slate-800">Presensi SDN Rappocini</h2>
+      <img src="icon-192.png" alt="Logo SD Negeri Rappocini" class="w-20 h-20 object-contain mx-auto mb-3">
+      <h2 class="text-xl font-bold text-slate-800">Presensi SD Negeri Rappocini</h2>
       <p class="text-xs text-slate-500 mt-1 mb-6">Silakan login menggunakan akun Anda</p>
 
       <div class="space-y-4 text-left">
         <div>
           <label class="text-xs font-semibold text-slate-600">ID User / NIP</label>
-          <input type="text" id="loginUserId" class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Masukkan ID User">
+          <input type="text" id="loginUserId" class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-navy-500 outline-none text-sm" placeholder="Masukkan ID User">
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-600">Password</label>
-          <input type="password" id="loginPassword" class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" placeholder="Masukkan Password">
+          <input type="password" id="loginPassword" class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-navy-500 outline-none text-sm" placeholder="Masukkan Password">
         </div>
-        <button onclick="doLogin()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-blue-500/30">
+        <button onclick="doLogin()" class="w-full py-3 bg-navy-600 hover:bg-navy-700 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-navy-500/30">
           Masuk Aplikasi
         </button>
       </div>
@@ -57,13 +71,13 @@
           G
         </div>
         <div>
-          <h1 class="font-bold text-sm leading-tight" id="headerUserName">Guru SDN Rappocini</h1>
-          <p class="text-xs text-blue-200" id="headerUserRole">Guru Kelas • Guru</p>
+          <h1 class="font-bold text-sm leading-tight" id="headerUserName">Guru SD Negeri Rappocini</h1>
+          <p class="text-xs text-navy-100" id="headerUserRole">Guru Kelas • Guru</p>
         </div>
       </div>
       <div class="text-right">
         <span id="headerClock" class="text-xs font-mono font-bold block">--.--.-- WITA</span>
-        <span id="headerDate" class="text-[10px] text-blue-200">Memuat tanggal...</span>
+        <span id="headerDate" class="text-[10px] text-navy-100">Memuat tanggal...</span>
       </div>
     </div>
   </header>
@@ -73,10 +87,29 @@
 
     <!-- TAB 1: HOME (PRESENSI KAMERA) -->
     <div id="tabHome" class="tab-content space-y-4">
+
+      <div class="bg-navy-50 border border-navy-200 text-navy-700 text-[11px] rounded-xl p-3 flex items-center justify-between">
+        <div><i class="fa-solid fa-calendar-day mr-1"></i> Jadwal Hari <b id="homeHariIni">-</b></div>
+        <div id="homeJadwalHariIni" class="text-right font-mono text-[10px] leading-tight">-</div>
+      </div>
+
       <div class="bg-white p-4 rounded-2xl shadow-sm text-center">
         <div class="relative rounded-xl overflow-hidden bg-black aspect-video mb-3 shadow-inner">
-          <video id="webcam" autoplay playsinline class="w-full h-full object-cover"></video>
+          <video id="webcam" autoplay playsinline muted class="w-full h-full object-cover" style="transform: scaleX(-1);"></video>
           <canvas id="canvas" class="hidden"></canvas>
+
+          <div id="cameraErrorOverlay" class="hidden absolute inset-0 bg-black/90 flex flex-col items-center justify-center text-center p-4 text-white text-xs gap-2 z-10">
+            <i class="fa-solid fa-video-slash text-2xl text-red-400"></i>
+            <p id="cameraErrorMsg" class="leading-snug">Kamera tidak dapat diakses.</p>
+            <button onclick="initCamera()" class="mt-1 px-3 py-1.5 bg-navy-600 rounded-lg text-[11px] font-semibold">
+              <i class="fa-solid fa-rotate mr-1"></i> Coba Lagi
+            </button>
+          </div>
+
+          <button onclick="initCamera()" title="Muat ulang kamera" class="absolute top-2 right-2 w-7 h-7 bg-black/50 hover:bg-black/70 rounded-full text-white text-xs flex items-center justify-center z-20">
+            <i class="fa-solid fa-rotate"></i>
+          </button>
+
           <div class="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[11px] p-2 rounded-lg flex justify-between items-center">
             <span><i class="fa-solid fa-location-dot text-red-400"></i> Jarak: <b id="textJarak">-</b> m</span>
             <span id="geofenceBadge" class="px-2 py-0.5 rounded text-[9px] bg-green-500 text-white">Geofence OK</span>
@@ -84,7 +117,7 @@
         </div>
 
         <div class="mb-4">
-          <textarea id="jurnalInput" rows="2" class="w-full text-xs p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Jurnal Mengajar / Catatan Harian (Opsional)..."></textarea>
+          <textarea id="jurnalInput" rows="2" class="w-full text-xs p-3 border rounded-xl focus:ring-2 focus:ring-navy-500 outline-none" placeholder="Jurnal Mengajar / Catatan Harian (Opsional)..."></textarea>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -112,7 +145,7 @@
             <input type="date" id="filterEndDate" class="w-full text-xs p-2 border rounded-lg">
           </div>
         </div>
-        <button onclick="loadRiwayatData()" class="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold">Tampilkan Data</button>
+        <button onclick="loadRiwayatData()" class="w-full py-2 bg-navy-600 text-white rounded-lg text-xs font-semibold">Tampilkan Data</button>
       </div>
 
       <!-- CHART RESUME -->
@@ -156,7 +189,7 @@
         <h2 class="text-xs font-bold text-slate-700 uppercase"><i class="fa-solid fa-file-signature mr-1"></i> Form Pengajuan Izin / Cuti</h2>
         <div>
           <label class="text-[11px] font-semibold text-slate-600">Jenis Pengajuan</label>
-          <select id="jenisIzin" class="w-full mt-1 p-2.5 border rounded-xl text-xs">
+          <select id="jenisIzin" onchange="toggleDinasLuarFields()" class="w-full mt-1 p-2.5 border rounded-xl text-xs">
             <option value="Izin">Izin</option>
             <option value="Sakit">Sakit</option>
             <option value="Cuti">Cuti</option>
@@ -173,6 +206,19 @@
             <input type="date" id="izinSelesai" class="w-full mt-1 p-2 border rounded-xl text-xs">
           </div>
         </div>
+        <div id="dinasLuarJamWrapper" class="hidden bg-navy-50 border border-navy-200 rounded-xl p-3 space-y-2">
+          <p class="text-[10px] text-navy-700 leading-snug"><i class="fa-solid fa-circle-info mr-1"></i>Isi jam mulai &amp; selesai dinas luar supaya jam kerja hari ini tetap terhitung di Rekap Jam Kerja.</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600">Jam Mulai (Absen Masuk)</label>
+              <input type="time" id="izinJamMasukDL" class="w-full mt-1 p-2 border rounded-xl text-xs">
+            </div>
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600">Jam Selesai (Absen Pulang)</label>
+              <input type="time" id="izinJamPulangDL" class="w-full mt-1 p-2 border rounded-xl text-xs">
+            </div>
+          </div>
+        </div>
         <div>
           <label class="text-[11px] font-semibold text-slate-600">Keterangan</label>
           <textarea id="izinKet" rows="2" class="w-full mt-1 p-2 border rounded-xl text-xs" placeholder="Alasan izin..."></textarea>
@@ -181,7 +227,7 @@
           <label class="text-[11px] font-semibold text-slate-600">Lampiran File (PDF/Foto)</label>
           <input type="file" id="izinFile" class="w-full mt-1 text-xs">
         </div>
-        <button onclick="submitIzin()" class="w-full py-3 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md">Kirim Pengajuan</button>
+        <button onclick="submitIzin()" class="w-full py-3 bg-navy-600 text-white rounded-xl text-xs font-bold shadow-md">Kirim Pengajuan</button>
       </div>
     </div>
 
@@ -192,7 +238,7 @@
       <div id="adminHub" class="admin-view space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-lg">
+            <div class="w-11 h-11 rounded-full bg-navy-100 text-navy-700 flex items-center justify-center text-lg">
               <i class="fa-solid fa-user-shield"></i>
             </div>
             <div>
@@ -207,19 +253,23 @@
 
         <div class="grid grid-cols-3 gap-3">
           <button onclick="openAdminPanel('panelSummary'); loadAdminSummary();" class="bg-white p-3 rounded-2xl shadow-sm flex flex-col items-center gap-2 hover:shadow-md transition">
-            <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-chart-pie"></i></div>
+            <div class="w-11 h-11 rounded-xl bg-navy-100 text-navy-600 flex items-center justify-center text-lg"><i class="fa-solid fa-chart-pie"></i></div>
             <span class="text-[10px] font-semibold text-slate-600 text-center leading-tight">Ringkasan<br>Hari Ini</span>
           </button>
           <button onclick="openAdminPanel('panelMatrix')" class="bg-white p-3 rounded-2xl shadow-sm flex flex-col items-center gap-2 hover:shadow-md transition">
-            <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-file-invoice"></i></div>
+            <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg"><i class="fa-solid fa-file-invoice"></i></div>
             <span class="text-[10px] font-semibold text-slate-600 text-center leading-tight">Rekap<br>Matrix</span>
           </button>
+          <button onclick="openAdminPanel('panelJamKerja')" class="bg-white p-3 rounded-2xl shadow-sm flex flex-col items-center gap-2 hover:shadow-md transition">
+            <div class="w-11 h-11 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-lg"><i class="fa-solid fa-business-time"></i></div>
+            <span class="text-[10px] font-semibold text-slate-600 text-center leading-tight">Rekap<br>Jam Kerja</span>
+          </button>
           <button onclick="openAdminPanel('panelNotif'); loadIzinNotif();" class="bg-white p-3 rounded-2xl shadow-sm flex flex-col items-center gap-2 hover:shadow-md transition">
-            <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-bell"></i></div>
+            <div class="w-11 h-11 rounded-xl bg-yellow-100 text-yellow-700 flex items-center justify-center text-lg"><i class="fa-solid fa-bell"></i></div>
             <span class="text-[10px] font-semibold text-slate-600 text-center leading-tight">Notifikasi<br>Izin</span>
           </button>
           <button onclick="openAdminPanel('panelUsers'); loadUsersList();" class="bg-white p-3 rounded-2xl shadow-sm flex flex-col items-center gap-2 hover:shadow-md transition">
-            <div class="w-11 h-11 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg"><i class="fa-solid fa-users-gear"></i></div>
+            <div class="w-11 h-11 rounded-xl bg-navy-200 text-navy-800 flex items-center justify-center text-lg"><i class="fa-solid fa-users-gear"></i></div>
             <span class="text-[10px] font-semibold text-slate-600 text-center leading-tight">Pengaturan<br>User</span>
           </button>
           <button onclick="openAdminPanel('panelSettings'); populateAdminSettingsForm();" class="bg-white p-3 rounded-2xl shadow-sm flex flex-col items-center gap-2 hover:shadow-md transition">
@@ -239,7 +289,7 @@
         <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
           <div class="flex gap-2">
             <input type="date" id="summaryDate" class="flex-1 p-2 border rounded-lg text-xs">
-            <button onclick="loadAdminSummary()" class="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">Tampilkan</button>
+            <button onclick="loadAdminSummary()" class="px-3 py-2 bg-navy-600 text-white rounded-lg text-xs font-bold">Tampilkan</button>
           </div>
 
           <div class="w-36 h-36 mx-auto py-1">
@@ -269,8 +319,9 @@
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div class="p-3 bg-slate-50 border-b">
+          <div class="p-3 bg-slate-50 border-b flex items-center justify-between">
             <span id="summaryFilterLabel" class="text-[10px] text-slate-400 uppercase font-semibold">Menampilkan: Semua Data</span>
+            <span class="text-[9px] text-slate-400"><i class="fa-solid fa-triangle-exclamation text-red-500"></i> = indikasi GPS mencurigakan</span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-[11px] text-left">
@@ -303,13 +354,63 @@
             <input type="date" id="rekapStart" class="p-2 border rounded-lg text-xs">
             <input type="date" id="rekapEnd" class="p-2 border rounded-lg text-xs">
           </div>
-          <button onclick="loadRekapMatrixPreview()" class="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-eye mr-1"></i> Tampilkan Preview</button>
+          <button onclick="loadRekapMatrixPreview()" class="w-full py-2 bg-navy-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-eye mr-1"></i> Tampilkan Preview</button>
           <button onclick="exportRekapMatrixExcel()" class="w-full py-2 bg-green-700 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-download mr-1"></i> Download Excel</button>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm p-3 overflow-x-auto">
           <table class="text-[10px] border-collapse w-full" id="matrixPreviewTable">
             <thead><tr><th class="p-4 text-center text-slate-300 font-normal" colspan="3">Belum ada data. Pilih rentang tanggal lalu tekan "Tampilkan Preview".</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PANEL: REKAP JAM KERJA -->
+      <div id="panelJamKerja" class="admin-view admin-panel hidden space-y-4">
+        <div class="flex items-center gap-2">
+          <button onclick="closeAdminPanel()" class="w-9 h-9 rounded-full bg-white shadow flex items-center justify-center text-slate-600"><i class="fa-solid fa-arrow-left"></i></button>
+          <h2 class="font-bold text-slate-800 text-sm">Rekap Jam Kerja</h2>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] text-slate-500">Mulai Tanggal</label>
+              <input type="date" id="jkStart" class="w-full p-2 border rounded-lg text-xs">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-500">Selesai Tanggal</label>
+              <input type="date" id="jkEnd" class="w-full p-2 border rounded-lg text-xs">
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-500">Target Jam Kerja (mis. 37.5 jam)</label>
+            <input type="number" step="0.5" id="jkTarget" value="37.5" class="w-full p-2 border rounded-lg text-xs">
+          </div>
+          <button onclick="loadRekapJamKerja()" class="w-full py-2 bg-navy-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-eye mr-1"></i> Tampilkan</button>
+          <button onclick="exportRekapJamKerjaExcel()" class="w-full py-2 bg-green-700 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-download mr-1"></i> Download Excel</button>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm">
+          <div class="w-36 h-36 mx-auto py-1">
+            <canvas id="jkChart"></canvas>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <div onclick="filterJamKerja('tercapai')" id="btn-jk-tercapai" class="bg-emerald-600 text-white text-center p-2.5 rounded-lg cursor-pointer hover:opacity-90 transition ring-2 ring-emerald-600">
+              <span class="block font-bold text-lg" id="jkCntTercapai">0</span>
+              <span class="text-[10px]">Mencapai Target</span>
+            </div>
+            <div onclick="filterJamKerja('tidak')" id="btn-jk-tidak" class="bg-red-500 text-white text-center p-2.5 rounded-lg cursor-pointer hover:opacity-90 transition opacity-70">
+              <span class="block font-bold text-lg" id="jkCntTidak">0</span>
+              <span class="text-[10px]">Tidak Mencapai</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm p-3 overflow-x-auto">
+          <table class="text-[10px] border-collapse w-full" id="jamKerjaTable">
+            <thead><tr><th class="p-4 text-center text-slate-300 font-normal" colspan="3">Belum ada data. Pilih rentang tanggal &amp; target lalu tekan "Tampilkan".</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -331,7 +432,7 @@
             <button onclick="closeAdminPanel()" class="w-9 h-9 rounded-full bg-white shadow flex items-center justify-center text-slate-600"><i class="fa-solid fa-arrow-left"></i></button>
             <h2 class="font-bold text-slate-800 text-sm">Pengaturan User</h2>
           </div>
-          <button onclick="openUserForm()" class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center shadow"><i class="fa-solid fa-plus"></i></button>
+          <button onclick="openUserForm()" class="w-9 h-9 rounded-full bg-navy-600 text-white flex items-center justify-center shadow"><i class="fa-solid fa-plus"></i></button>
         </div>
         <div id="usersListContainer" class="space-y-2"></div>
       </div>
@@ -343,9 +444,28 @@
           <h2 class="font-bold text-slate-800 text-sm">Pengaturan Aplikasi</h2>
         </div>
 
+        <!-- Koordinat & Radius: GLOBAL, cukup diatur 1 kali -->
         <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="text-[11px] font-bold text-navy-600">Koordinat &amp; Radius Sekolah (Global)</div>
+            <button onclick="useMyLocationForSettings()" class="text-[10px] text-navy-600 underline"><i class="fa-solid fa-location-crosshairs mr-1"></i>Pakai Lokasi Saya</button>
+          </div>
+          <p class="text-[10px] text-slate-400 -mt-2">Koordinat &amp; radius ini berlaku untuk semua hari, cukup diatur satu kali di sini.</p>
           <div class="grid grid-cols-2 gap-2">
-            <div class="col-span-2 text-[11px] font-bold text-blue-600">Shift Pagi</div>
+            <input type="number" step="any" id="cfgLat" placeholder="Latitude" class="p-2 border rounded-lg text-xs">
+            <input type="number" step="any" id="cfgLng" placeholder="Longitude" class="p-2 border rounded-lg text-xs">
+          </div>
+          <input type="number" id="cfgRadius" placeholder="Radius Maksimal Absen (Meter)" class="w-full p-2 border rounded-lg text-xs">
+          <button onclick="saveLocationSettings()" class="w-full py-2.5 bg-navy-700 text-white rounded-lg text-xs font-bold shadow-md">Simpan Koordinat &amp; Radius</button>
+        </div>
+
+        <!-- Jadwal Per Hari -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+          <div class="text-[11px] font-bold text-navy-600">Jam Kerja &amp; Kunci Lokasi per Hari</div>
+          <div class="grid grid-cols-6 gap-1" id="daySelectorTabs"></div>
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <div class="col-span-2 text-[11px] font-bold text-slate-600">Shift Pagi</div>
             <div>
               <label class="text-[10px] text-slate-500">Jam Masuk</label>
               <input type="time" id="cfgPagiMasuk" class="w-full p-2 border rounded-lg text-xs">
@@ -355,7 +475,7 @@
               <input type="time" id="cfgPagiPulang" class="w-full p-2 border rounded-lg text-xs">
             </div>
 
-            <div class="col-span-2 text-[11px] font-bold text-blue-600 mt-2">Shift Siang</div>
+            <div class="col-span-2 text-[11px] font-bold text-slate-600 mt-2">Shift Siang</div>
             <div>
               <label class="text-[10px] text-slate-500">Jam Masuk</label>
               <input type="time" id="cfgSiangMasuk" class="w-full p-2 border rounded-lg text-xs">
@@ -366,25 +486,34 @@
             </div>
           </div>
 
-          <div class="border-t pt-2 space-y-2">
-            <div class="flex items-center justify-between">
-              <div class="text-[11px] font-bold text-blue-600">Geofence & Koordinat Sekolah</div>
-              <button onclick="useMyLocationForSettings()" class="text-[10px] text-blue-600 underline"><i class="fa-solid fa-location-crosshairs mr-1"></i>Pakai Lokasi Saya</button>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="number" step="any" id="cfgLat" placeholder="Latitude" class="p-2 border rounded-lg text-xs">
-              <input type="number" step="any" id="cfgLng" placeholder="Longitude" class="p-2 border rounded-lg text-xs">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="number" id="cfgRadius" placeholder="Radius (Meter)" class="p-2 border rounded-lg text-xs">
-              <select id="cfgGeofenceActive" class="p-2 border rounded-lg text-xs">
-                <option value="true">Geofence Aktif</option>
-                <option value="false">Geofence Nonaktif</option>
-              </select>
-            </div>
+          <div class="flex items-center justify-between border-t pt-2">
+            <div class="text-[11px] font-semibold text-slate-600">Kunci Lokasi (Geofence) hari ini</div>
+            <select id="cfgGeofenceActive" class="p-2 border rounded-lg text-xs">
+              <option value="true">Aktif</option>
+              <option value="false">Nonaktif</option>
+            </select>
           </div>
 
-          <button onclick="saveAdminSettings()" class="w-full py-2 bg-slate-800 text-white rounded-lg text-xs font-bold">Simpan Pengaturan</button>
+          <button onclick="copyDaySettingsToAllDays()" class="w-full py-2 bg-navy-50 text-navy-700 border border-navy-200 rounded-lg text-[11px] font-semibold">
+            <i class="fa-solid fa-copy mr-1"></i> Terapkan Jadwal Hari Ini ke Semua Hari
+          </button>
+          <button onclick="saveScheduleSettings()" class="w-full py-2.5 bg-navy-700 text-white rounded-lg text-xs font-bold shadow-md">Simpan Jam Kerja &amp; Kunci Lokasi</button>
+        </div>
+
+        <!-- Kunci Lokasi (Geofence) per Jabatan per Hari -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+          <div class="text-[11px] font-bold text-navy-600">Kunci Lokasi (Geofence) per Jabatan</div>
+          <p class="text-[10px] text-slate-400 -mt-2">Pilih hari, lalu atur jabatan mana yang kunci lokasinya aktif. Jabatan yang dinonaktifkan boleh presensi dari mana saja pada hari tersebut. Jika Kunci Lokasi hari itu sudah Nonaktif di kartu di atas, berlaku untuk semua jabatan.</p>
+          <div class="grid grid-cols-6 gap-1" id="jbDayTabs"></div>
+          <div id="jbGeofenceList" class="space-y-1.5"></div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="setAllJabatanGeofence(true)" class="py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-[11px] font-semibold">Aktifkan Semua</button>
+            <button onclick="setAllJabatanGeofence(false)" class="py-2 bg-slate-50 text-slate-600 border border-slate-200 rounded-lg text-[11px] font-semibold">Nonaktifkan Semua</button>
+          </div>
+          <button onclick="copyJabatanGeofenceToAllDays()" class="w-full py-2 bg-navy-50 text-navy-700 border border-navy-200 rounded-lg text-[11px] font-semibold">
+            <i class="fa-solid fa-copy mr-1"></i> Terapkan Pengaturan Hari Ini ke Semua Hari
+          </button>
+          <button onclick="saveJabatanGeofenceSettings()" class="w-full py-2.5 bg-navy-700 text-white rounded-lg text-xs font-bold shadow-md">Simpan Kunci Lokasi per Jabatan</button>
         </div>
       </div>
 
@@ -420,10 +549,15 @@
      * KONSTANTA & STATE GLOBAL
      * ======================================================================== */
     const BACKEND_URL = "https://script.google.com/macros/s/AKfycbw_9x605iW-gYV3OX3n56GgRf7Q0NLGXpiMSJusheTyElMEEXeaRjqJJFJsofvwAYrIfg/exec";
+    const NAMA_SEKOLAH = "SD NEGERI RAPPOCINI";
+    const DAY_LIST = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
     let currentUser = null;
     let appSettings = {};
-    let currentGeo = { lat: 0, lng: 0, distance: 99999 };
+    let currentGeo = { lat: 0, lng: 0, distance: 99999, accuracy: null };
+    let geoHistory = []; // riwayat titik GPS terakhir, dipakai untuk deteksi kejanggalan (fake GPS)
+    const GEO_HISTORY_MAX = 6;
+    const GEO_HISTORY_WINDOW_MS = 90 * 1000;
 
     let chartInstance = null;
     let lastRiwayatData = [];
@@ -434,6 +568,17 @@
 
     let lastMatrixResult = null;
     let usersCache = [];
+
+    let jadwalHarianEdit = {};
+    let activeSettingsDay = 'Senin';
+
+    let geofenceJabatanEdit = {};   // { Senin: ['Guru Kelas 1', ...jabatan yang geofence-nya NONAKTIF] }
+    let jabatanListCache = [];
+    let activeJabatanDay = 'Senin';
+
+    let lastJamKerjaResult = null;
+    let jkChart = null;
+    let jkFilter = 'tercapai';
 
     window.onload = function () {
       initRealtimeClockAndDate();
@@ -446,6 +591,36 @@
      * ======================================================================== */
     function todayISO() {
       return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Makassar', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    }
+
+    // Nama hari (Senin..Minggu) versi WITA, dipakai untuk mencocokkan jadwal
+    // per-hari dari Pengaturan Aplikasi (jadwalHarian) dengan hari ini.
+    function getHariIniName() {
+      const map = { 'Sunday': 'Minggu', 'Monday': 'Senin', 'Tuesday': 'Selasa', 'Wednesday': 'Rabu', 'Thursday': 'Kamis', 'Friday': 'Jumat', 'Saturday': 'Sabtu' };
+      const wd = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Makassar', weekday: 'long' }).format(new Date());
+      return map[wd] || 'Senin';
+    }
+
+    function getTodayDayConfig() {
+      const hari = getHariIniName();
+      const jadwal = appSettings.jadwalHarian || {};
+      return jadwal[hari] || jadwal['Senin'] || {};
+    }
+
+    // Apakah kunci lokasi (geofence) berlaku untuk user yang sedang login hari ini?
+    // Nonaktif jika: (1) geofence hari ini dimatikan untuk semua, ATAU
+    // (2) jabatan user termasuk daftar jabatan yang dinonaktifkan pada hari ini.
+    function normJabatan(s) {
+      return String(s || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+
+    function isGeofenceRequiredToday() {
+      const dayCfg = getTodayDayConfig();
+      if (dayCfg.geofenceActive === false) return false;
+      const offMap = appSettings.geofenceJabatanOff || {};
+      const offList = offMap[getHariIniName()] || [];
+      const myJabatan = normJabatan(currentUser && currentUser.jabatan);
+      return !offList.some(j => normJabatan(j) === myJabatan);
     }
 
     function initRealtimeClockAndDate() {
@@ -464,13 +639,65 @@
       document.querySelectorAll('input[type="date"]').forEach(input => { input.value = today; });
     }
 
+    function renderHomeJadwalInfo() {
+      const hari = getHariIniName();
+      const cfg = getTodayDayConfig();
+      document.getElementById('homeHariIni').innerText = hari;
+      document.getElementById('homeJadwalHariIni').innerHTML =
+        `Pagi ${cfg.pagiMasuk || '-'}–${cfg.pagiPulang || '-'}<br>Siang ${cfg.siangMasuk || '-'}–${cfg.siangPulang || '-'}`;
+    }
+
     /* ==========================================================================
      * KAMERA & LOKASI (GEOFENCE)
      * ======================================================================== */
     function initCamera() {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-        .then(stream => { document.getElementById('webcam').srcObject = stream; })
-        .catch(err => { console.log('Camera error:', err); });
+      const video = document.getElementById('webcam');
+      const overlay = document.getElementById('cameraErrorOverlay');
+      overlay.classList.add('hidden');
+
+      // Hentikan stream lama dulu (kalau ada) supaya tidak bentrok saat kamera dimuat ulang
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+      }
+
+      tryStartCamera({ video: { facingMode: { ideal: 'user' } }, audio: false });
+    }
+
+    function tryStartCamera(constraints) {
+      const video = document.getElementById('webcam');
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then(stream => {
+          video.srcObject = stream;
+          // Beberapa browser mobile butuh play() eksplisit, atribut autoplay saja kadang gagal diam-diam.
+          video.play().catch(() => {});
+          document.getElementById('cameraErrorOverlay').classList.add('hidden');
+        })
+        .catch(err => {
+          console.log('Camera error:', err);
+          // Kalau constraint facingMode ditolak perangkat (bukan soal izin), coba ulang dengan constraint paling umum.
+          const isPermissionIssue = (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError');
+          if (constraints.video && constraints.video.facingMode && !isPermissionIssue) {
+            return tryStartCamera({ video: true, audio: false });
+          }
+          showCameraError(err);
+        });
+    }
+
+    function showCameraError(err) {
+      const pesanMap = {
+        'NotAllowedError': 'Izin kamera ditolak. Ketuk ikon kamera/gembok di address bar browser, izinkan akses kamera, lalu muat ulang halaman.',
+        'PermissionDeniedError': 'Izin kamera ditolak. Ketuk ikon kamera/gembok di address bar browser, izinkan akses kamera, lalu muat ulang halaman.',
+        'NotFoundError': 'Kamera tidak ditemukan di perangkat ini.',
+        'DevicesNotFoundError': 'Kamera tidak ditemukan di perangkat ini.',
+        'NotReadableError': 'Kamera sedang dipakai aplikasi lain (mis. WhatsApp/Zoom). Tutup aplikasi tersebut, lalu tekan "Coba Lagi".',
+        'TrackStartError': 'Kamera sedang dipakai aplikasi lain (mis. WhatsApp/Zoom). Tutup aplikasi tersebut, lalu tekan "Coba Lagi".',
+        'OverconstrainedError': 'Kamera pada perangkat ini tidak mendukung pengaturan yang diminta.',
+        'SecurityError': 'Akses kamera diblokir karena halaman tidak dibuka lewat koneksi aman (HTTPS).'
+      };
+      const msg = pesanMap[err.name] || 'Tidak dapat mengakses kamera. Pastikan browser mendukung dan izin kamera sudah diberikan, lalu coba lagi.';
+      document.getElementById('cameraErrorMsg').innerText = msg;
+      document.getElementById('cameraErrorOverlay').classList.remove('hidden');
     }
 
     function initLocation() {
@@ -478,9 +705,69 @@
         navigator.geolocation.watchPosition(pos => {
           currentGeo.lat = pos.coords.latitude;
           currentGeo.lng = pos.coords.longitude;
+          currentGeo.accuracy = pos.coords.accuracy;
+
+          geoHistory.push({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy, ts: Date.now() });
+          const cutoff = Date.now() - GEO_HISTORY_WINDOW_MS;
+          geoHistory = geoHistory.filter(g => g.ts >= cutoff).slice(-GEO_HISTORY_MAX);
+
           checkGeofenceDistance();
-        });
+        }, err => { console.log('Geolocation error:', err); }, { enableHighAccuracy: true });
       }
+    }
+
+    /* ==========================================================================
+     * DETEKSI KEJANGGALAN GPS (INDIKASI FAKE GPS)
+     * Catatan jujur: browser TIDAK bisa memastikan 100% apakah GPS itu asli atau
+     * palsu (itu hanya bisa lewat API native Android). Fungsi ini hanya menyaring
+     * pola-pola paling umum dari aplikasi fake GPS: lompatan lokasi yang mustahil
+     * secara fisik, titik yang diam sempurna tanpa noise alami, dan akurasi yang
+     * tidak wajar. Kasus berat (lompatan lokasi) diblokir; kasus ringan tetap
+     * diizinkan absen tapi dicatat untuk ditinjau Admin (menghindari salah blokir
+     * guru yang GPS-nya memang sedang bagus/stabil).
+     * ======================================================================== */
+    function haversineMeters(lat1, lng1, lat2, lng2) {
+      const R = 6371e3;
+      const phi1 = lat1 * Math.PI / 180, phi2 = lat2 * Math.PI / 180;
+      const dPhi = (lat2 - lat1) * Math.PI / 180;
+      const dLambda = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dPhi / 2) ** 2 + Math.cos(phi1) * Math.cos(phi2) * Math.sin(dLambda / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function analyzeGeoAnomaly() {
+      const flags = [];
+
+      // 1) Lompatan lokasi mustahil (mis. berpindah ratusan km dalam hitungan detik)
+      for (let i = 1; i < geoHistory.length; i++) {
+        const prev = geoHistory[i - 1], curr = geoHistory[i];
+        const dtSec = (curr.ts - prev.ts) / 1000;
+        if (dtSec <= 0) continue;
+        const distM = haversineMeters(prev.lat, prev.lng, curr.lat, curr.lng);
+        const speedKmh = (distM / dtSec) * 3.6;
+        if (speedKmh > 250 && distM > 50) {
+          flags.push('LOMPATAN_LOKASI (~' + Math.round(speedKmh) + ' km/jam)');
+          break;
+        }
+      }
+
+      // 2) Titik diam sempurna (identik persis) dalam rentang waktu cukup lama -
+      //    GPS asli hampir selalu punya sedikit noise alami walau HP tidak bergerak.
+      if (geoHistory.length >= 3) {
+        const last3 = geoHistory.slice(-3);
+        const allIdentik = last3.every(g => g.lat === last3[0].lat && g.lng === last3[0].lng);
+        const spanMs = last3[last3.length - 1].ts - last3[0].ts;
+        if (allIdentik && spanMs >= 10000) {
+          flags.push('TITIK_STATIS_SEMPURNA');
+        }
+      }
+
+      // 3) Akurasi tidak wajar (sangat presisi, jarang terjadi pada GPS ponsel biasa)
+      if (currentGeo.accuracy !== null && currentGeo.accuracy !== undefined && currentGeo.accuracy <= 1) {
+        flags.push('AKURASI_TIDAK_WAJAR (' + currentGeo.accuracy + 'm)');
+      }
+
+      return flags;
     }
 
     function checkGeofenceDistance() {
@@ -497,8 +784,9 @@
 
       document.getElementById('textJarak').innerText = currentGeo.distance;
       const badge = document.getElementById('geofenceBadge');
+      const geofenceOn = isGeofenceRequiredToday();
 
-      if (!appSettings.geofenceActive) {
+      if (!geofenceOn) {
         badge.innerText = 'Geofence OFF';
         badge.className = 'px-2 py-0.5 rounded text-[9px] bg-slate-500 text-white';
       } else if (currentGeo.distance <= appSettings.maxRadiusMeter) {
@@ -559,6 +847,8 @@
             document.getElementById('userAvatar').innerText = (currentUser.nama || 'G').charAt(0).toUpperCase();
 
             populateJenisIzinDropdown();
+            renderHomeJadwalInfo();
+            checkGeofenceDistance();
 
             if (String(currentUser.role).toUpperCase() === 'ADMIN') {
               document.getElementById('navAdmin').classList.remove('hidden');
@@ -618,9 +908,24 @@
      * ABSEN MASUK / PULANG
      * ======================================================================== */
     function triggerAbsen(tipe) {
-      if (appSettings.geofenceActive && currentGeo.distance > appSettings.maxRadiusMeter) {
+      const geofenceOn = isGeofenceRequiredToday();
+
+      if (geofenceOn && currentGeo.distance > appSettings.maxRadiusMeter) {
         return Swal.fire('Diluar Jangkauan', 'Jarak Anda ' + currentGeo.distance + 'm dari sekolah. Maksimal ' + appSettings.maxRadiusMeter + 'm.', 'error');
       }
+
+      const gpsFlags = analyzeGeoAnomaly();
+      const gpsHardBlock = gpsFlags.some(f => f.startsWith('LOMPATAN_LOKASI'));
+
+      if (gpsHardBlock) {
+        return Swal.fire({
+          icon: 'error',
+          title: 'Lokasi GPS Tidak Wajar',
+          html: 'Sistem mendeteksi perpindahan lokasi yang mustahil secara fisik dalam waktu singkat (indikasi aplikasi fake GPS aktif). Nonaktifkan aplikasi fake GPS / pengaturan lokasi palsu di ponsel Anda, lalu tunggu beberapa detik dan coba absen kembali.'
+        });
+      }
+
+      window.__pendingGpsFlags = gpsFlags;
 
       if (tipe === 'MASUK') {
         Swal.fire({
@@ -630,7 +935,7 @@
           showCancelButton: true,
           confirmButtonText: 'Shift Pagi',
           cancelButtonText: 'Shift Siang',
-          confirmButtonColor: '#2563eb',
+          confirmButtonColor: '#0f2a66',
           cancelButtonColor: '#d97706'
         }).then((result) => {
           let selectedShift = 'PAGI';
@@ -653,7 +958,17 @@
       canvas.height = video.videoHeight || 480;
 
       const ctx = canvas.getContext('2d');
+
+      // Gambar video dalam kondisi dibalik horizontal (mirror), supaya hasil foto
+      // yang tersimpan sama persis seperti yang terlihat guru di preview kamera
+      // (preview juga di-mirror lewat CSS transform: scaleX(-1) pada #webcam).
+      ctx.save();
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+      // Context dikembalikan normal (tidak di-mirror) di atas, supaya semua teks
+      // banner di bawah ini digambar dalam orientasi biasa dan tetap terbaca.
 
       const bannerHeight = 85;
       ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
@@ -662,7 +977,7 @@
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 16px Arial';
       const namaGuru = (typeof currentUser !== 'undefined' && currentUser.nama) ? currentUser.nama : '';
-      ctx.fillText(`SDN RAPPOCINI - ${namaGuru}`, 15, canvas.height - 58);
+      ctx.fillText(`${NAMA_SEKOLAH} - ${namaGuru}`, 15, canvas.height - 58);
 
       ctx.font = '13px Arial';
       const waktuSekarang = new Date().toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WITA';
@@ -688,7 +1003,8 @@
           jarak: currentGeo.distance,
           latLong: currentGeo.lat + ',' + currentGeo.lng,
           jurnal: jurnal,
-          photoBase64: photoBase64
+          photoBase64: photoBase64,
+          gpsFlags: window.__pendingGpsFlags || []
         })
       })
         .then(res => res.json())
@@ -755,21 +1071,21 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="p-2">
-            <b class="block text-slate-700">${r.nama}</b>
+            <b class="block text-slate-700">${r.nama}${r.gpsFlag && r.gpsFlag !== '-' ? ` <i class="fa-solid fa-triangle-exclamation text-red-500 text-[10px]" title="Indikasi GPS mencurigakan: ${r.gpsFlag}"></i>` : ''}</b>
             <span class="text-[9px] text-slate-400">${r.tanggal}${r.shift && r.shift !== '-' ? ' (' + r.shift + ')' : ''}</span>
           </td>
           <td class="p-2"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${statusBadgeClass(r.status)}">${r.status}</span></td>
           <td class="p-2 font-mono text-center">
             <div>${r.jamMasuk}</div>
-            ${mapMasukUrl ? `<a href="${mapMasukUrl}" target="_blank" class="text-[9px] text-emerald-600 hover:underline block font-sans"><i class="fa-solid fa-location-dot"></i> Peta</a>` : ''}
+            ${mapMasukUrl ? `<a href="${mapMasukUrl}" target="_blank" class="text-[9px] text-navy-600 hover:underline block font-sans"><i class="fa-solid fa-location-dot"></i> Peta</a>` : ''}
           </td>
           <td class="p-2 font-mono text-center">
             <div>${r.jamPulang}</div>
             ${mapPulangUrl ? `<a href="${mapPulangUrl}" target="_blank" class="text-[9px] text-amber-600 hover:underline block font-sans"><i class="fa-solid fa-location-dot"></i> Peta</a>` : ''}
           </td>
-          <td class="p-2 text-center font-bold text-blue-600">${durasi}</td>
-          <td class="p-2 text-center">${r.fotoMasuk && r.fotoMasuk !== '-' ? `<a href="${r.fotoMasuk}" target="_blank" class="text-blue-600 underline text-[10px]">Foto</a>` : '-'}</td>
-          <td class="p-2 text-center">${r.fotoPulang && r.fotoPulang !== '-' ? `<a href="${r.fotoPulang}" target="_blank" class="text-blue-600 underline text-[10px]">Foto</a>` : '-'}</td>
+          <td class="p-2 text-center font-bold text-navy-600">${durasi}</td>
+          <td class="p-2 text-center">${r.fotoMasuk && r.fotoMasuk !== '-' ? `<a href="${r.fotoMasuk}" target="_blank" class="text-navy-600 underline text-[10px]">Foto</a>` : '-'}</td>
+          <td class="p-2 text-center">${r.fotoPulang && r.fotoPulang !== '-' ? `<a href="${r.fotoPulang}" target="_blank" class="text-navy-600 underline text-[10px]">Foto</a>` : '-'}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -835,6 +1151,14 @@
       sel.innerHTML = opts.map(o => `<option value="${o}">${o}</option>`).join('');
     }
 
+    // Menampilkan/menyembunyikan field jam masuk & pulang manual, hanya untuk
+    // jenis pengajuan "Dinas Luar" (supaya jam kerja tetap terhitung).
+    function toggleDinasLuarFields() {
+      const jenis = document.getElementById('jenisIzin').value;
+      const wrapper = document.getElementById('dinasLuarJamWrapper');
+      wrapper.classList.toggle('hidden', jenis !== 'Dinas Luar');
+    }
+
     function submitIzin() {
       const jenis = document.getElementById('jenisIzin').value;
       const mulai = document.getElementById('izinMulai').value;
@@ -844,18 +1168,31 @@
 
       if (!mulai || !ket) return Swal.fire('Peringatan', 'Isi tanggal dan keterangan!', 'warning');
 
+      let jamMasukDL = "";
+      let jamPulangDL = "";
+      if (jenis === 'Dinas Luar') {
+        jamMasukDL = document.getElementById('izinJamMasukDL').value;
+        jamPulangDL = document.getElementById('izinJamPulangDL').value;
+        if ((jamMasukDL && !jamPulangDL) || (!jamMasukDL && jamPulangDL)) {
+          return Swal.fire('Peringatan', 'Isi jam mulai DAN jam selesai dinas luar (atau kosongkan keduanya)!', 'warning');
+        }
+        if (jamMasukDL && jamPulangDL && jamPulangDL <= jamMasukDL) {
+          return Swal.fire('Peringatan', 'Jam selesai dinas luar harus lebih besar dari jam mulai!', 'warning');
+        }
+      }
+
       Swal.showLoading();
 
       if (fileInput.files.length > 0) {
         const reader = new FileReader();
-        reader.onload = function (e) { sendIzinApi(jenis, mulai, selesai, ket, e.target.result, fileInput.files[0].name); };
+        reader.onload = function (e) { sendIzinApi(jenis, mulai, selesai, ket, e.target.result, fileInput.files[0].name, jamMasukDL, jamPulangDL); };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        sendIzinApi(jenis, mulai, selesai, ket, "", "");
+        sendIzinApi(jenis, mulai, selesai, ket, "", "", jamMasukDL, jamPulangDL);
       }
     }
 
-    function sendIzinApi(jenis, mulai, selesai, ket, fileBase64, fileName) {
+    function sendIzinApi(jenis, mulai, selesai, ket, fileBase64, fileName, jamMasukDL, jamPulangDL) {
       fetch(BACKEND_URL, {
         method: 'POST',
         body: JSON.stringify({
@@ -867,7 +1204,9 @@
           tanggalSelesai: selesai,
           keterangan: ket,
           fileBase64: fileBase64,
-          fileName: fileName
+          fileName: fileName,
+          jamMasukDinasLuar: jamMasukDL || "",
+          jamPulangDinasLuar: jamPulangDL || ""
         })
       })
         .then(res => res.json())
@@ -876,6 +1215,10 @@
           if (res.status === 'success') {
             document.getElementById('izinKet').value = '';
             document.getElementById('izinFile').value = '';
+            document.getElementById('izinJamMasukDL').value = '';
+            document.getElementById('izinJamPulangDL').value = '';
+            document.getElementById('jenisIzin').value = 'Izin';
+            toggleDinasLuarFields();
             switchTab('Jurnal');
             loadRiwayatData();
           }
@@ -896,43 +1239,234 @@
     }
 
     /* ==========================================================================
-     * ADMIN: PENGATURAN APLIKASI
+     * ADMIN: PENGATURAN APLIKASI (KOORDINAT GLOBAL + JADWAL PER HARI)
      * ======================================================================== */
     function populateAdminSettingsForm() {
-      document.getElementById('cfgPagiMasuk').value = appSettings.pagiMasuk;
-      document.getElementById('cfgPagiPulang').value = appSettings.pagiPulang;
-      document.getElementById('cfgSiangMasuk').value = appSettings.siangMasuk;
-      document.getElementById('cfgSiangPulang').value = appSettings.siangPulang;
       document.getElementById('cfgLat').value = appSettings.latitude;
       document.getElementById('cfgLng').value = appSettings.longitude;
       document.getElementById('cfgRadius').value = appSettings.maxRadiusMeter;
-      document.getElementById('cfgGeofenceActive').value = appSettings.geofenceActive ? "true" : "false";
+
+      jadwalHarianEdit = JSON.parse(JSON.stringify(appSettings.jadwalHarian || {}));
+      DAY_LIST.forEach(d => { if (!jadwalHarianEdit[d]) jadwalHarianEdit[d] = { pagiMasuk: '', pagiPulang: '', siangMasuk: '', siangPulang: '', geofenceActive: true }; });
+
+      activeSettingsDay = getHariIniName();
+      if (DAY_LIST.indexOf(activeSettingsDay) === -1) activeSettingsDay = 'Senin';
+
+      renderDayTabs();
+      loadDayFormFields(activeSettingsDay);
+
+      populateJabatanGeofenceForm();
     }
 
-    function saveAdminSettings() {
-      const payload = {
-        action: 'saveSettings',
+    /* ==========================================================================
+     * ADMIN: KUNCI LOKASI (GEOFENCE) PER JABATAN PER HARI
+     * ======================================================================== */
+    function populateJabatanGeofenceForm() {
+      geofenceJabatanEdit = {};
+      const saved = appSettings.geofenceJabatanOff || {};
+      DAY_LIST.forEach(d => { geofenceJabatanEdit[d] = Array.isArray(saved[d]) ? saved[d].slice() : []; });
+
+      activeJabatanDay = getHariIniName();
+      if (DAY_LIST.indexOf(activeJabatanDay) === -1) activeJabatanDay = 'Senin';
+
+      document.getElementById('jbGeofenceList').innerHTML = '<div class="text-center py-4 text-slate-400 text-xs">Memuat daftar jabatan...</div>';
+      renderJabatanDayTabs();
+
+      // Daftar jabatan diambil dari kolom Jabatan di sheet Users (selalu data terbaru).
+      fetch(BACKEND_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsers' }) })
+        .then(res => res.json())
+        .then(res => {
+          if (res.status !== 'success') throw new Error('gagal');
+          usersCache = res.users;
+          buildJabatanList(res.users);
+          renderJabatanGeofenceList();
+        })
+        .catch(() => {
+          buildJabatanList(usersCache || []);
+          renderJabatanGeofenceList();
+        });
+    }
+
+    function buildJabatanList(users) {
+      const seen = {};
+      const list = [];
+      function add(name) {
+        const n = String(name || '').trim().replace(/\s+/g, ' ');
+        const k = n.toLowerCase();
+        if (n && !seen[k]) { seen[k] = true; list.push(n); }
+      }
+      (users || []).forEach(u => add(u.jabatan));
+      // jabatan yang sudah tersimpan di pengaturan tetap ditampilkan walau belum ada user-nya
+      DAY_LIST.forEach(d => (geofenceJabatanEdit[d] || []).forEach(add));
+      list.sort((a, b) => a.localeCompare(b, 'id', { numeric: true }));
+      jabatanListCache = list;
+    }
+
+    function renderJabatanDayTabs() {
+      const c = document.getElementById('jbDayTabs');
+      c.innerHTML = DAY_LIST.map(d => {
+        const isActive = d === activeJabatanDay;
+        return `<button type="button" onclick="switchJabatanDay('${d}')" class="py-1.5 rounded-lg text-[10px] font-bold border transition ${isActive ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-slate-600 border-slate-200'}">${d.slice(0, 3)}</button>`;
+      }).join('');
+    }
+
+    function switchJabatanDay(day) {
+      activeJabatanDay = day;
+      renderJabatanDayTabs();
+      renderJabatanGeofenceList();
+    }
+
+    function isJabatanGeofenceOff(day, jabatan) {
+      const k = normJabatan(jabatan);
+      return (geofenceJabatanEdit[day] || []).some(j => normJabatan(j) === k);
+    }
+
+    function renderJabatanGeofenceList() {
+      const c = document.getElementById('jbGeofenceList');
+      if (!jabatanListCache.length) {
+        c.innerHTML = '<div class="text-center py-4 text-slate-400 text-xs">Belum ada data jabatan di sheet Users.</div>';
+        return;
+      }
+      const day = activeJabatanDay;
+      const dayGlobalOff = ((appSettings.jadwalHarian || {})[day] || {}).geofenceActive === false;
+      const note = dayGlobalOff
+        ? '<div class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">Kunci Lokasi hari ' + day + ' sedang Nonaktif untuk semua jabatan (kartu Jam Kerja &amp; Kunci Lokasi per Hari).</div>'
+        : '';
+      c.innerHTML = note + jabatanListCache.map((j, idx) => {
+        const aktif = !isJabatanGeofenceOff(day, j);
+        const safe = String(j).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+        return `<label class="flex items-center justify-between p-2 rounded-lg border ${aktif ? 'border-green-200 bg-green-50/50' : 'border-slate-200 bg-slate-50'}">
+          <span class="text-[11px] font-semibold text-slate-700">${safe}</span>
+          <span class="flex items-center gap-2">
+            <span class="text-[10px] font-bold ${aktif ? 'text-green-600' : 'text-slate-500'}">${aktif ? 'Aktif' : 'Nonaktif'}</span>
+            <input type="checkbox" class="w-4 h-4 accent-green-600" ${aktif ? 'checked' : ''} onchange="toggleJabatanGeofence(${idx}, this.checked)">
+          </span>
+        </label>`;
+      }).join('');
+    }
+
+    function toggleJabatanGeofence(idx, aktif) {
+      const j = jabatanListCache[idx];
+      const day = activeJabatanDay;
+      const k = normJabatan(j);
+      let list = (geofenceJabatanEdit[day] || []).filter(x => normJabatan(x) !== k);
+      if (!aktif) list.push(j);
+      geofenceJabatanEdit[day] = list;
+      renderJabatanGeofenceList();
+    }
+
+    function setAllJabatanGeofence(aktif) {
+      geofenceJabatanEdit[activeJabatanDay] = aktif ? [] : jabatanListCache.slice();
+      renderJabatanGeofenceList();
+    }
+
+    function copyJabatanGeofenceToAllDays() {
+      const source = (geofenceJabatanEdit[activeJabatanDay] || []).slice();
+      Swal.fire({
+        title: 'Terapkan ke Semua Hari?',
+        text: `Pengaturan jabatan hari ${activeJabatanDay} akan disalin ke Senin s/d Sabtu. Lanjutkan?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Terapkan',
+        confirmButtonColor: '#0f2a66',
+        cancelButtonText: 'Batal'
+      }).then(result => {
+        if (!result.isConfirmed) return;
+        DAY_LIST.forEach(d => { geofenceJabatanEdit[d] = source.slice(); });
+        renderJabatanGeofenceList();
+        Swal.fire({ icon: 'success', title: 'Diterapkan', text: 'Berhasil disalin ke semua hari. Jangan lupa klik Simpan Kunci Lokasi per Jabatan.', timer: 2000, showConfirmButton: false });
+      });
+    }
+
+    function saveJabatanGeofenceSettings() {
+      postSettings({ action: 'saveSettings', geofenceJabatanOff: geofenceJabatanEdit });
+    }
+
+    function renderDayTabs() {
+      const c = document.getElementById('daySelectorTabs');
+      c.innerHTML = DAY_LIST.map(d => {
+        const isActive = d === activeSettingsDay;
+        return `<button type="button" onclick="switchSettingsDay('${d}')" class="py-1.5 rounded-lg text-[10px] font-bold border transition ${isActive ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-slate-600 border-slate-200'}">${d.slice(0, 3)}</button>`;
+      }).join('');
+    }
+
+    function loadDayFormFields(day) {
+      const cfg = jadwalHarianEdit[day] || {};
+      document.getElementById('cfgPagiMasuk').value = cfg.pagiMasuk || '';
+      document.getElementById('cfgPagiPulang').value = cfg.pagiPulang || '';
+      document.getElementById('cfgSiangMasuk').value = cfg.siangMasuk || '';
+      document.getElementById('cfgSiangPulang').value = cfg.siangPulang || '';
+      document.getElementById('cfgGeofenceActive').value = (cfg.geofenceActive === false) ? 'false' : 'true';
+    }
+
+    function saveCurrentDayFieldsToState() {
+      jadwalHarianEdit[activeSettingsDay] = {
         pagiMasuk: document.getElementById('cfgPagiMasuk').value,
         pagiPulang: document.getElementById('cfgPagiPulang').value,
         siangMasuk: document.getElementById('cfgSiangMasuk').value,
         siangPulang: document.getElementById('cfgSiangPulang').value,
-        latitude: document.getElementById('cfgLat').value,
-        longitude: document.getElementById('cfgLng').value,
-        maxRadiusMeter: document.getElementById('cfgRadius').value,
-        geofenceActive: document.getElementById('cfgGeofenceActive').value
+        geofenceActive: document.getElementById('cfgGeofenceActive').value === 'true'
       };
+    }
 
+    function switchSettingsDay(day) {
+      saveCurrentDayFieldsToState();
+      activeSettingsDay = day;
+      renderDayTabs();
+      loadDayFormFields(day);
+    }
+
+    function copyDaySettingsToAllDays() {
+      saveCurrentDayFieldsToState();
+      const source = jadwalHarianEdit[activeSettingsDay];
+      Swal.fire({
+        title: 'Terapkan ke Semua Hari?',
+        text: `Jadwal hari ${activeSettingsDay} akan disalin ke Senin s/d Sabtu. Lanjutkan?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Terapkan',
+        confirmButtonColor: '#0f2a66',
+        cancelButtonText: 'Batal'
+      }).then(result => {
+        if (!result.isConfirmed) return;
+        DAY_LIST.forEach(d => { jadwalHarianEdit[d] = Object.assign({}, source); });
+        loadDayFormFields(activeSettingsDay);
+        Swal.fire({ icon: 'success', title: 'Diterapkan', text: 'Jadwal berhasil disalin ke semua hari. Jangan lupa klik Simpan Jam Kerja & Kunci Lokasi.', timer: 2000, showConfirmButton: false });
+      });
+    }
+
+    // Kirim pengaturan ke backend. Hanya field yang ada di payload yang diperbarui
+    // di sheet, jadi menyimpan koordinat tidak menyentuh jadwal, dan sebaliknya.
+    function postSettings(payload) {
       Swal.showLoading();
       fetch(BACKEND_URL, { method: 'POST', body: JSON.stringify(payload) })
         .then(res => res.json())
         .then(res => {
           if (res.status === 'success') {
             appSettings = res.settings;
+            renderHomeJadwalInfo();
+            checkGeofenceDistance();
             Swal.fire('Sukses', res.message, 'success');
           } else {
             Swal.fire('Gagal', res.message, 'error');
           }
-        });
+        })
+        .catch(() => Swal.fire('Gagal', 'Tidak dapat terhubung ke server.', 'error'));
+    }
+
+    // Tombol 1: hanya Koordinat & Radius
+    function saveLocationSettings() {
+      const lat = document.getElementById('cfgLat').value;
+      const lng = document.getElementById('cfgLng').value;
+      const radius = document.getElementById('cfgRadius').value;
+      if (!lat || !lng || !radius) return Swal.fire('Peringatan', 'Isi latitude, longitude, dan radius terlebih dahulu.', 'warning');
+      postSettings({ action: 'saveSettings', latitude: lat, longitude: lng, maxRadiusMeter: radius });
+    }
+
+    // Tombol 2: hanya Jam Kerja & Kunci Lokasi per Hari
+    function saveScheduleSettings() {
+      saveCurrentDayFieldsToState();
+      postSettings({ action: 'saveSettings', jadwalHarian: jadwalHarianEdit });
     }
 
     /* ==========================================================================
@@ -961,7 +1495,7 @@
         div.className = 'bg-white p-3 rounded-xl shadow-sm flex items-center justify-between text-xs';
         div.innerHTML = `
           <div>
-            <div class="font-bold text-slate-800">${u.nama} <span class="ml-1 px-1.5 py-0.5 rounded text-[9px] ${u.role === 'Admin' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}">${u.role}</span></div>
+            <div class="font-bold text-slate-800">${u.nama} <span class="ml-1 px-1.5 py-0.5 rounded text-[9px] ${u.role === 'Admin' ? 'bg-amber-100 text-amber-700' : 'bg-navy-100 text-navy-700'}">${u.role}</span></div>
             <div class="text-[10px] text-slate-500">ID: ${u.id} • ${u.jabatan || '-'}</div>
           </div>
           <div class="flex gap-1">
@@ -1101,7 +1635,7 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="p-2">
-            <b class="block text-slate-700">${d.nama}</b>
+            <b class="block text-slate-700">${d.nama}${d.gpsFlag && d.gpsFlag !== '-' ? ` <i class="fa-solid fa-triangle-exclamation text-red-500 text-[10px]" title="Indikasi GPS mencurigakan: ${d.gpsFlag}"></i>` : ''}</b>
             <span class="text-[9px] text-slate-400">${tanggalLabel}</span>
           </td>
           <td class="p-2">
@@ -1110,15 +1644,15 @@
           </td>
           <td class="p-2 font-mono text-center">
             <div>${d.jamMasuk}</div>
-            ${mapMasukUrl ? `<a href="${mapMasukUrl}" target="_blank" class="text-[9px] text-emerald-600 hover:underline block font-sans"><i class="fa-solid fa-location-dot"></i> Peta</a>` : ''}
+            ${mapMasukUrl ? `<a href="${mapMasukUrl}" target="_blank" class="text-[9px] text-navy-600 hover:underline block font-sans"><i class="fa-solid fa-location-dot"></i> Peta</a>` : ''}
           </td>
           <td class="p-2 font-mono text-center">
             <div>${d.jamPulang}</div>
             ${mapPulangUrl ? `<a href="${mapPulangUrl}" target="_blank" class="text-[9px] text-amber-600 hover:underline block font-sans"><i class="fa-solid fa-location-dot"></i> Peta</a>` : ''}
           </td>
-          <td class="p-2 text-center font-bold text-blue-600">${d.durasi}</td>
-          <td class="p-2 text-center">${d.fotoMasuk && d.fotoMasuk !== '-' ? `<a href="${d.fotoMasuk}" target="_blank" class="text-blue-600 underline text-[10px]">Foto</a>` : '-'}</td>
-          <td class="p-2 text-center">${d.fotoPulang && d.fotoPulang !== '-' ? `<a href="${d.fotoPulang}" target="_blank" class="text-blue-600 underline text-[10px]">Foto</a>` : '-'}</td>
+          <td class="p-2 text-center font-bold text-navy-600">${d.durasi}</td>
+          <td class="p-2 text-center">${d.fotoMasuk && d.fotoMasuk !== '-' ? `<a href="${d.fotoMasuk}" target="_blank" class="text-navy-600 underline text-[10px]">Foto</a>` : '-'}</td>
+          <td class="p-2 text-center">${d.fotoPulang && d.fotoPulang !== '-' ? `<a href="${d.fotoPulang}" target="_blank" class="text-navy-600 underline text-[10px]">Foto</a>` : '-'}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -1214,11 +1748,9 @@
       if (!lastMatrixResult) return Swal.fire('Info', 'Tampilkan preview terlebih dahulu sebelum download.', 'info');
       const res = lastMatrixResult;
 
-      // Baris header 1: Nama Guru + tanggal (tiap tanggal akan digabung/merge 2 kolom)
       const h1 = ['Nama Guru'];
       res.dates.forEach(d => { h1.push(d, ''); });
 
-      // Baris header 2: sub-kolom Masuk / Pulang di bawah tiap tanggal
       const h2 = [''];
       res.dates.forEach(() => { h2.push('Masuk', 'Pulang'); });
 
@@ -1234,7 +1766,6 @@
 
       const ws = XLSX.utils.aoa_to_sheet(rows);
 
-      // Gabungkan sel: "Nama Guru" menyatu 2 baris, tiap tanggal menyatu 2 kolom
       const merges = [{ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }];
       res.dates.forEach((d, idx) => {
         const col = 1 + idx * 2;
@@ -1245,6 +1776,105 @@
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Rekap Matrix');
       XLSX.writeFile(wb, `Rekap_Matrix_${res.dates[0]}_sd_${res.dates[res.dates.length - 1]}.xlsx`);
+    }
+
+    /* ==========================================================================
+     * ADMIN: REKAP JAM KERJA (PREVIEW + DIAGRAM + FILTER + EXPORT)
+     * ======================================================================== */
+    function loadRekapJamKerja() {
+      const start = document.getElementById('jkStart').value;
+      const end = document.getElementById('jkEnd').value;
+      const target = parseFloat(document.getElementById('jkTarget').value) || 37.5;
+      if (!start || !end) return Swal.fire('Peringatan', 'Pilih tanggal mulai dan selesai', 'warning');
+
+      Swal.showLoading();
+      fetch(BACKEND_URL, { method: 'POST', body: JSON.stringify({ action: 'getRekapJamKerja', startDate: start, endDate: end, target: target }) })
+        .then(res => res.json())
+        .then(res => {
+          Swal.close();
+          if (res.status !== 'success') return Swal.fire('Gagal', res.message || 'Terjadi kesalahan', 'error');
+          lastJamKerjaResult = res;
+
+          document.getElementById('jkCntTercapai').innerText = res.summary.tercapai;
+          document.getElementById('jkCntTidak').innerText = res.summary.tidakTercapai;
+
+          renderJamKerjaChart(res.summary);
+          filterJamKerja(jkFilter);
+        });
+    }
+
+    function renderJamKerjaChart(s) {
+      const ctx = document.getElementById('jkChart').getContext('2d');
+      if (jkChart) jkChart.destroy();
+      jkChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Mencapai Target', 'Tidak Mencapai'],
+          datasets: [{ data: [s.tercapai, s.tidakTercapai], backgroundColor: ['#059669', '#ef4444'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+    }
+
+    function filterJamKerja(kind) {
+      jkFilter = kind;
+      document.getElementById('btn-jk-tercapai').classList.toggle('ring-2', kind === 'tercapai');
+      document.getElementById('btn-jk-tercapai').classList.toggle('opacity-70', kind !== 'tercapai');
+      document.getElementById('btn-jk-tidak').classList.toggle('ring-2', kind === 'tidak');
+      document.getElementById('btn-jk-tidak').classList.toggle('opacity-70', kind !== 'tidak');
+
+      if (!lastJamKerjaResult) return;
+      const list = kind === 'tercapai' ? lastJamKerjaResult.tercapaiList : lastJamKerjaResult.tidakTercapaiList;
+      renderJamKerjaTable(lastJamKerjaResult.dates, list);
+    }
+
+    function renderJamKerjaTable(dates, list) {
+      const table = document.getElementById('jamKerjaTable');
+
+      if (!list || list.length === 0) {
+        table.innerHTML = '<thead><tr><th class="p-4 text-center text-slate-300 font-normal">Tidak ada data untuk kategori ini</th></tr></thead><tbody></tbody>';
+        return;
+      }
+
+      let thead = '<tr><th class="p-2 sticky left-0 bg-slate-100 text-left">Nama</th>';
+      dates.forEach(d => { thead += `<th class="p-1 text-center bg-slate-100">${d.slice(5)}</th>`; });
+      thead += `<th class="p-1 text-center bg-slate-200 font-bold">Total</th></tr>`;
+
+      let tbody = '';
+      list.forEach(u => {
+        tbody += `<tr><td class="p-2 sticky left-0 bg-white font-semibold">${u.nama}</td>`;
+        dates.forEach(d => {
+          const c = u.perTanggal[d];
+          const jk = (c && c.jamKerja) ? c.jamKerja : 0;
+          tbody += `<td class="p-1 text-center">${jk > 0 ? jk : '-'}</td>`;
+        });
+        const cls = u.tercapai ? 'text-emerald-600' : 'text-red-500';
+        tbody += `<td class="p-1 text-center font-bold ${cls}">${u.totalJamKerja}</td></tr>`;
+      });
+
+      table.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
+    }
+
+    function exportRekapJamKerjaExcel() {
+      if (!lastJamKerjaResult) return Swal.fire('Info', 'Tampilkan data terlebih dahulu sebelum download.', 'info');
+      const res = lastJamKerjaResult;
+
+      const header = ['Nama', ...res.dates, 'Total Jam Kerja', `Target (${res.target} Jam)`];
+      const rows = [header];
+      res.data.forEach(u => {
+        const r = [u.nama];
+        res.dates.forEach(d => {
+          const c = u.perTanggal[d];
+          r.push((c && c.jamKerja) ? c.jamKerja : 0);
+        });
+        r.push(u.totalJamKerja, u.tercapai ? 'Mencapai Target' : 'Tidak Mencapai');
+        rows.push(r);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Rekap Jam Kerja');
+      XLSX.writeFile(wb, `Rekap_JamKerja_${res.dates[0]}_sd_${res.dates[res.dates.length - 1]}.xlsx`);
     }
 
     /* ==========================================================================
@@ -1279,7 +1909,7 @@
           </div>
           <div class="text-[10px] text-slate-500">ID: ${r.idGuru} • Tanggal: ${r.tanggal}</div>
           ${r.jurnal && r.jurnal !== '-' ? `<div class="text-[11px] text-slate-600 italic">"${r.jurnal}"</div>` : ''}
-          <div>${hasFile ? `<a href="${r.fotoPulang}" target="_blank" class="text-blue-600 underline text-[10px]"><i class="fa-solid fa-paperclip mr-1"></i>Lihat File Lampiran</a>` : '<span class="text-[10px] text-slate-400">Tidak ada lampiran</span>'}</div>
+          <div>${hasFile ? `<a href="${r.fotoPulang}" target="_blank" class="text-navy-600 underline text-[10px]"><i class="fa-solid fa-paperclip mr-1"></i>Lihat File Lampiran</a>` : '<span class="text-[10px] text-slate-400">Tidak ada lampiran</span>'}</div>
         `;
         c.appendChild(div);
       });
